@@ -17,11 +17,11 @@ flowchart LR
   API -->|labels and one status comment| GH
 ```
 
-| Workspace | Purpose | Port |
-| --- | --- | --- |
-| `apps/web` | shadcn/ui remediation console and authenticated server-side oRPC proxy | `3000` |
-| `apps/api` | oRPC router, Devin client, GitHub webhook, and reconciler | `3001` |
-| `packages/contracts` | Shared Zod schemas and oRPC contract | n/a |
+| Workspace            | Purpose                                                                | Port   |
+| -------------------- | ---------------------------------------------------------------------- | ------ |
+| `apps/web`           | shadcn/ui remediation console and authenticated server-side oRPC proxy | `3000` |
+| `apps/api`           | oRPC router, Devin client, GitHub webhook, and reconciler              | `3001` |
+| `packages/contracts` | Shared Zod schemas and oRPC contract                                   | n/a    |
 
 The browser calls `/rpc` on the web application. A web Route Handler forwards the request to the API (`API_INTERNAL_URL`) and adds `CONTROL_PLANE_TOKEN` on the server, so the API credential is never included in client JavaScript.
 
@@ -45,22 +45,22 @@ Prerequisites: Docker with Compose v2. No local Node.js toolchain is needed.
 
 The single root `Dockerfile` is multi-stage with two runtime targets (`api` and `web`); Compose builds both services from it. A third `scheduler` service replaces Vercel Cron in Docker: it calls the authenticated `/api/cron/reconcile` endpoint every five minutes. The daily vulnerability scan needs no container cron because it is [scheduled natively in Devin](#daily-dependency-vulnerability-scan).
 
-| Compose service | Image source | Port |
-| --- | --- | --- |
-| `web` | `Dockerfile` target `web` | `3000` |
-| `api` | `Dockerfile` target `api` (healthchecked on `/api/health`) | `3001` |
-| `scheduler` | `curlimages/curl` loop | n/a |
+| Compose service | Image source                                               | Port   |
+| --------------- | ---------------------------------------------------------- | ------ |
+| `web`           | `Dockerfile` target `web`                                  | `3000` |
+| `api`           | `Dockerfile` target `api` (healthchecked on `/api/health`) | `3001` |
+| `scheduler`     | `curlimages/curl` loop                                     | n/a    |
 
 ### Credentials
 
-| Variable | Purpose |
-| --- | --- |
-| `DEVIN_API_TOKEN`, `DEVIN_ORG_ID` | Devin API v3 service user with `ManageOrgSessions` and `ViewOrgSessions` |
-| `GITHUB_REPOSITORY` | Target repository (`owner/name`) |
-| `GITHUB_TOKEN` | Fine-grained token or GitHub App installation token: metadata read, Issues read/write |
-| `GITHUB_WEBHOOK_SECRET` | HMAC secret for webhook signature verification |
-| `CRON_SECRET` | Bearer token protecting `/api/cron/*` (used by the `scheduler` service) |
-| `CONTROL_PLANE_TOKEN` | Shared bearer token between the web proxy and the API |
+| Variable                          | Purpose                                                                               |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| `DEVIN_API_TOKEN`, `DEVIN_ORG_ID` | Devin API v3 service user with `ManageOrgSessions` and `ViewOrgSessions`              |
+| `GITHUB_REPOSITORY`               | Target repository (`owner/name`)                                                      |
+| `GITHUB_TOKEN`                    | Fine-grained token or GitHub App installation token: metadata read, Issues read/write |
+| `GITHUB_WEBHOOK_SECRET`           | HMAC secret for webhook signature verification                                        |
+| `CRON_SECRET`                     | Bearer token protecting `/api/cron/*` (used by the `scheduler` service)               |
+| `CONTROL_PLANE_TOKEN`             | Shared bearer token between the web proxy and the API                                 |
 
 Generate independent random values for the three secrets, for example with `openssl rand -hex 32`. Devin must have access to the target repository through its git integration.
 
@@ -154,12 +154,12 @@ The automation accepts three initiation paths:
 
 Comment commands are available to repository collaborators with write, maintain, or admin permission:
 
-| Command | Result |
-| --- | --- |
-| `/devin start` | Starts the session, or returns the existing session for that issue |
-| `/devin retry` | Explicitly creates a new session for a previous attempt |
-| `/devin stop` | Terminates and archives the newest issue session |
-| `/devin <instruction>` | Sends a follow-up instruction and resumes a suspended session |
+| Command                | Result                                                             |
+| ---------------------- | ------------------------------------------------------------------ |
+| `/devin start`         | Starts the session, or returns the existing session for that issue |
+| `/devin retry`         | Explicitly creates a new session for a previous attempt            |
+| `/devin stop`          | Terminates and archives the newest issue session                   |
+| `/devin <instruction>` | Sends a follow-up instruction and resumes a suspended session      |
 
 Session tags provide the durable issue mapping. Each new session includes `remediation-control-plane`, a repository tag, `github-issue-N`, and the issue category. This avoids relying on in-memory state, prevents equal issue numbers in different repositories from colliding, and makes session creation idempotent across deployments.
 
@@ -209,13 +209,13 @@ Run **Prepare labels** in the console once, or call `automation.ensureLabels` th
 
 Every five minutes, the reconciler reads current Devin state and updates one marker-based comment on each source issue. The comment contains the session link, status detail, ACUs consumed, last update time, and any pull request links. Reusing one comment keeps the issue timeline readable.
 
-| Devin state | GitHub state |
-| --- | --- |
-| `new`, `claimed`, `running`, or `resuming` | `devin-running` |
+| Devin state                                  | GitHub state        |
+| -------------------------------------------- | ------------------- |
+| `new`, `claimed`, `running`, or `resuming`   | `devin-running`     |
 | `waiting_for_user` or `waiting_for_approval` | `devin-needs-input` |
-| Pull request present | `devin-pr-open` |
-| `exit` or `finished` | `devin-complete` |
-| `error` or a non-inactivity suspension | `devin-failed` |
+| Pull request present                         | `devin-pr-open`     |
+| `exit` or `finished`                         | `devin-complete`    |
+| `error` or a non-inactivity suspension       | `devin-failed`      |
 
 Each session is ACU-capped and requests structured output containing:
 
@@ -266,29 +266,29 @@ Manual launches are idempotent too: if a scan session for the repository is stil
 
 - **Dashboard pages**: the Overview page combines issues, sessions, and metrics; the Sessions page shows every Devin session with an activity timeline; the Automations page shows webhook, reconcile, scan-schedule, and label state with one-click actions.
 - **Endpoints**: `GET /api/health` (service and per-credential readiness), `system.readiness` over oRPC, and the compose healthcheck on the API container.
-- **GitHub**: each remediated issue carries the current `devin-*` label and one continuously-updated status comment with the session link, ACU usage, and PR links.
+- **GitHub**: each remediated issue carries the current `devin-`* label and one continuously-updated status comment with the session link, ACU usage, and PR links.
 
 ## oRPC surface
 
 The API mounts oRPC at `/rpc/[[...rest]]` and implements the shared contract in `packages/contracts`.
 
-| Procedure | Purpose |
-| --- | --- |
-| `system.health` | Typed service health response |
-| `system.readiness` | Read credential and automation readiness without loading GitHub data |
-| `repositories.list` | List configured repository workspaces |
-| `issues.list` | List all open GitHub issues for a selected repository |
-| `automation.overview` | Combine selected repository issues, sessions, readiness, and metrics |
-| `automation.ensureLabels` | Provision automation labels |
-| `automation.reconcile` | Synchronize Devin state to GitHub |
-| `automation.scan` | Launch the idempotent one-off dependency vulnerability scan session |
-| `automation.scanSchedule` | Read the Devin-native daily scan schedule state |
-| `automation.ensureScanSchedule` | Idempotently provision the Devin-native daily scan schedule |
-| `sessions.list` / `sessions.get` | Inspect sessions |
-| `sessions.start` | Start an idempotent remediation session |
-| `sessions.message` | Send a follow-up instruction |
-| `sessions.archive` | Archive and suspend a session |
-| `sessions.terminate` | Permanently stop and archive a session |
+| Procedure                        | Purpose                                                              |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `system.health`                  | Typed service health response                                        |
+| `system.readiness`               | Read credential and automation readiness without loading GitHub data |
+| `repositories.list`              | List configured repository workspaces                                |
+| `issues.list`                    | List all open GitHub issues for a selected repository                |
+| `automation.overview`            | Combine selected repository issues, sessions, readiness, and metrics |
+| `automation.ensureLabels`        | Provision automation labels                                          |
+| `automation.reconcile`           | Synchronize Devin state to GitHub                                    |
+| `automation.scan`                | Launch the idempotent one-off dependency vulnerability scan session  |
+| `automation.scanSchedule`        | Read the Devin-native daily scan schedule state                      |
+| `automation.ensureScanSchedule`  | Idempotently provision the Devin-native daily scan schedule          |
+| `sessions.list` / `sessions.get` | Inspect sessions                                                     |
+| `sessions.start`                 | Start an idempotent remediation session                              |
+| `sessions.message`               | Send a follow-up instruction                                         |
+| `sessions.archive`               | Archive and suspend a session                                        |
+| `sessions.terminate`             | Permanently stop and archive a session                               |
 
 The project pins the oRPC v2 beta packages to `2.0.0-beta.32` so contract, server, and client versions cannot drift independently.
 
