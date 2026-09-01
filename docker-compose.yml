@@ -1,0 +1,48 @@
+services:
+  api:
+    build:
+      context: .
+      target: api
+    env_file: .env
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  web:
+    build:
+      context: .
+      target: web
+    environment:
+      API_INTERNAL_URL: http://api:3001
+      API_CONTROL_PLANE_TOKEN: ${CONTROL_PLANE_TOKEN}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # Replaces Vercel Cron when running in Docker: triggers the GitHub<->Devin
+  # reconciler every 5 minutes. The daily vulnerability scan needs no cron
+  # here because it is scheduled natively in Devin (see README).
+  scheduler:
+    image: curlimages/curl:8.11.1
+    restart: unless-stopped
+    environment:
+      CRON_SECRET: ${CRON_SECRET}
+    depends_on:
+      api:
+        condition: service_healthy
+    command: >-
+      sh -c 'while true;
+      do curl -fsS -m 120 -H "Authorization: Bearer $$CRON_SECRET" http://api:3001/api/cron/reconcile
+      || echo "[scheduler] reconcile request failed";
+      echo;
+      sleep 300;
+      done'

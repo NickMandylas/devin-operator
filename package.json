@@ -1,0 +1,19 @@
+{
+  "name": "superset-devin-automation",
+  "private": true,
+  "packageManager": "pnpm@10.30.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @superset-devin/contracts build && concurrently --kill-others-on-fail -n API,WEB -c yellow,cyan \"pnpm --filter @superset-devin/api dev\" \"pnpm --filter @superset-devin/web dev\"",
+    "build": "pnpm --filter @superset-devin/contracts build && pnpm --parallel --filter './apps/*' build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r --if-present test",
+    "lint": "pnpm -r --if-present lint"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.5",
+    "typescript": "6.0.3"
+  }
+}

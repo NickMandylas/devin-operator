@@ -1,0 +1,36 @@
+:root {
+  color-scheme: dark;
+  background: #10110f;
+  color: #f3efe5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+}
+
+section {
+  max-width: 720px;
+  border: 1px solid #36382f;
+  background: #171814;
+  padding: 32px;
+}
+
+a {
+  color: #67d9df;
+}
+
+code {
+  color: #f4b74e;
+}
