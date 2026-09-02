@@ -281,7 +281,9 @@ export async function reconcileSessions(repository?: string): Promise<{
         issue.number,
         sessions,
       );
-      if (!session) continue;
+      // Archived sessions are treated as "ready to launch" by the dashboard;
+      // re-syncing them would resurrect stale labels and status comments.
+      if (!session || session.isArchived) continue;
       try {
         const current = isActive(session)
           ? await getDevinSession(session.sessionId)
